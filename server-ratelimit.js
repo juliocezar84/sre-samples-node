@@ -7,7 +7,7 @@ const port = 8080;
 // Middleware de rate limiting (Limite de 5 requisições por minuto)
 const limiter = rateLimit({
     windowMs: 60 * 1000,  // 1 minuto
-    max: 100,  // Limite de 5 requisições
+    max: 100,  // Limite de 100 requisições
     message: 'Você excedeu o limite de requisições, tente novamente mais tarde.',
 });
 

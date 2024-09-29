@@ -191,7 +191,8 @@ Por exemplo, caso não exista solução de segurança, é possível ficar chaman
 Em arquiteturas que possuam autoscaling esse é um mecanismo importante para evitar que chamadas maliciosas faça com que mais recursos sejam alocados e por consequência aumente o custo da aplicação.
 Importante salientar que existem várias formas de aplicar o rate limit, por exemplo por IP, região geográfica.
 Dessa forma o rate limit pode bloquear requisições de um usuário/recurso e permitir que outro usuário/recurso acesse o serviço normalmente.
-Para fazer mais de 100 chamadas no serviço...
+Para fazer mais de 100 chamadas no serviço utilizamos o comando abaixo no bash:
+while true; do curl -s localhost:8080/api/ratelimit; echo; sleep 0.1; done
 Código alterado adicionado ao repositório.
 ```
 

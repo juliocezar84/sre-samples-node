@@ -1,3 +1,5 @@
+# Jeremias Barbosa e Julio Vicente
+
 # Exemplos Práticos de Resiliência em Aplicações Node.js
 Este material contempla exemplos práticos de uso de técnicas essenciais em aplicações, afim de garantir a confiabilidade, resiliência, escalabilidade e alta disponibilidade.
 
@@ -112,9 +114,13 @@ Ajustar configurações de timeout e corrigir erro de timeout execedido ao invoc
 
 ```
 // INSIRA SUA ANÁLISE OU PARECER ABAIXO
-
-
-
+Ocorria timeout porque o serviço simulava um tempo de resposta de 5 segundos enquanto o timeout estava definido com 3 segundos.
+Uma possível abordagem seria aumentar o timeout, mas não é o ideal nem o recomendado.
+A abordagem num cenário real seria melhorar a performance da aplicação e ajustar o timeout para um valor viável.
+Fizemos as alterações abaixo:
+1-Melhoramos a performance da aplicação para que ela responda em 200 ms ou menos, pois um tempo de 5000 ms para retornar a chamada não é viável em termos computacionais nem de negócio.
+2-Ajustamos o timeout para um valor mais aceitável (300 ms), pois um tempo de 3000 ms de timeout também não é viável em termos computacionais e de negócio.
+Código alterado adicionado ao repositório.
 ```
 
 
@@ -179,9 +185,14 @@ Alterar limite de requisições permitidas para 100 num intervalo de 1 minuto e 
 
 ```
 // INSIRA SUA ANÁLISE OU PARECER ABAIXO
-
-
-
+O rate limit é utilizado para impedir que a aplicação receba um número maior do que o projetado e para que um usuário/recurso não exaura todos os recursos do servidor.
+Outro ponto é impedir chamadas maliciosas com o intuito de onerar e/ou derrubar aplicação, ou até mesmo ficar chamando um serviço para coletar/roubar dados.
+Por exemplo, caso não exista solução de segurança, é possível ficar chamando um serviço de uma loja virtual para coletar dados de produtos.
+Em arquiteturas que possuam autoscaling esse é um mecanismo importante para evitar que chamadas maliciosas faça com que mais recursos sejam alocados e por consequência aumente o custo da aplicação.
+Importante salientar que existem várias formas de aplicar o rate limit, por exemplo por IP, região geográfica.
+Dessa forma o rate limit pode bloquear requisições de um usuário/recurso e permitir que outro usuário/recurso acesse o serviço normalmente.
+Para fazer mais de 100 chamadas no serviço...
+Código alterado adicionado ao repositório.
 ```
 
 
@@ -327,9 +338,36 @@ Observar comportamento do circuito no console.
 
 ```
 // INSIRA SUA ANÁLISE OU PARECER ABAIXO
-
-
-
+O circuit breaker é bastante importante na resiliência de aplicações pois com esse padrão
+pode-se criar uma alternativa caso haja erro em algum ponto da aplicação.
+Um exemplo seria uma loja virtual com 2 serviços:
+1 - Serviço de detalhe do produto que retorna o produto e suas características.
+2 - Serviço de comentários de usuários sobre o produto.
+O comportamento normal seria chamar o serviço 1 para retornar o produto e suas características e este chamar o serviço 2 para retornar os comentários dos usuários sobre aquele produto.
+O serviço mais importante é o 1, enquanto o serviço 2 é secundário.
+Caso estejamos tendo problema no serviço 2 podemos deixar de chamá-lo para que não impacte no serviço 1. Nesse caso o produto e suas características continuariam sendo retornados porém sem os comentários.
+O circuit breaker possui 3 estados descritos abaixo:
+Closed: O comportamento padrão da aplicação, o fluxo não sofre nenhum desvio.
+No nosso exemplo o serviço 1 é chamado que chama o serviço 2 e retorna as características do produto e os comentários dos usuários sobre o mesmo.
+Open: O comportamento em caso de falha, também conhecido como fallback.
+No nosso exemplo o serviço demora muito para retornar ou não retorna, fazendo com que o circuito seja aberto.
+O nosso fallback seria parar de chamar o serviço 2 e não retornar os comentários. Dessa forma a funcionalida mais importante continuaria funcionando normalmente.
+HalfOpen: O comportamento que faz com que algumas requisicões sigam o fluxo normal e outras sigam o fallback.
+No nosso exemplo passariam pelo fluxo padrão para verificar se o serviço 2 voltou a performar normalmente.
+Em caso de sucesso o circuito seria fechado, em caso de falha o serviço circuito voltaria para aberto
+Importante citar que em alguns frameworks podemos configurar o circuit breaker através de parâmetros, por exemplo no resilience4j:
+failureRateThreshold: O limite da taxa de falha em porcentagem, quando a taxa de falha é igual ou maior que o limite, o circuit breaker faz a transição para aberto.
+slowCallDurationThreshold: o limite de duração acima do qual as chamadas são consideradas lentas.
+slowCallRateThreshold: O limite da taxa de chamada lenta, quando a taxa de chamada lenta é igual ou maior que o limite, o circuit breaker faz a transição para aberto.
+minimumNumberOfCalls: O número mínimo de chamadas que são necessárias antes que o circuit breaker possa calcular a taxa de erro ou taxa de chamada lenta.
+waitDurationInOpenState: O tempo que o circuit breaker deve esperar antes de passar de aberto para semiaberto
+Para verificar o comportamento do circuit breaker utilizamos seguinte comando:
+while true; do curl -s localhost:8080/api/circuitbreaker; echo; sleep 1; done
+Alteramos o timeout para 1 segundo e o tempo de retorno da chamada para 200 milissegundos para agilizar os testes.
+Além disso alteramos a lógica para definir a porcentagem de sucesso e o parâmetro de sucesso para 60% (portanto 40% de falha).
+Para forçar sucesso no estado HalfOpen alteramos o percentual de sucesso para 100% quando estivermos nesse estado.
+Caso o percentual de sucesso tenha sido alterado para forçar sucesso voltamos ele ao padrão.
+Código alterado adicionado ao repositório.
 ```
 
 ---

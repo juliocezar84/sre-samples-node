@@ -36,7 +36,7 @@ Caso o volume seja muito alto podemos aplicar o fallback de enviar para uma fila
 
 Obviamente não existe solução padrão que se aplique a todos os cenários, então cada uma dessas abordagens (e seus parâmetros) devem ser estudadas e aplicadas para cada caso.
 
-Além disso o acompanhamento da performance do sistema e do resultado retornado pela aplicação dessas abordagens deve ser continuamente avaliado, trazendo assim possíveis ajustes a serem aplicados. 
+Além disso o acompanhamento da performance do sistema e do resultado retornado pela implementação dessas abordagens deve ser continuamente avaliado, trazendo assim possíveis ajustes a serem aplicados. 
 
 # Exemplos Práticos de Resiliência em Aplicações Node.js
 Este material contempla exemplos práticos de uso de técnicas essenciais em aplicações, afim de garantir a confiabilidade, resiliência, escalabilidade e alta disponibilidade.

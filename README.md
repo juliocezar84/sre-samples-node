@@ -227,7 +227,7 @@ O rate limit é utilizado para impedir que a aplicação receba um número maior
 Outro ponto é impedir chamadas maliciosas com o intuito de onerar e/ou derrubar aplicação, ou até mesmo ficar chamando um serviço para coletar/roubar dados.
 Por exemplo, caso não exista solução de segurança, é possível ficar chamando um serviço de uma loja virtual para coletar dados de produtos.
 Em arquiteturas que possuam autoscaling esse é um mecanismo importante para evitar que chamadas maliciosas faça com que mais recursos sejam alocados e por consequência aumente o custo da aplicação.
-Importante salientar que existem várias formas de aplicar o rate limit, por exemplo por IP, região geográfica.
+Importante salientar que existem várias formas de aplicar o rate limit, por exemplo por IP e/ou região geográfica.
 Dessa forma o rate limit pode bloquear requisições de um usuário/recurso e permitir que outro usuário/recurso acesse o serviço normalmente.
 Para fazer mais de 100 chamadas no serviço utilizamos o comando abaixo no bash:
 while true; do curl -s localhost:8080/api/ratelimit; echo; sleep 0.1; done
@@ -353,6 +353,7 @@ Time per request:       114.160 [ms] (mean)
 Time per request:       28.540 [ms] (mean, across all concurrent requests)
 Transfer rate:          7.77 [Kbytes/sec] received
 O que nos mostra que o servidor foi capaz de lidar com a concorrência de 4 chamadas por vez.
+Código alterado adicionado ao repositório.
 ```
 
 

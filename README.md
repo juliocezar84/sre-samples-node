@@ -1,4 +1,42 @@
 # Jeremias Barbosa e Julio Vicente
+# Parecer geral:
+Além dos pareceres de cada padrão de resiliência trazemos também o parecer geral abaixo:
+
+Os padrões demonstrados podem ser aplicados isoladamente, mas uma abordagem onde eles são aplicados em conjunto é muito mais interessante.
+
+Por exemplo podemos definir um timeout para que chamadas não fiquem aguardando muito tempo, e caso estejam demorando demais aplicar o circuit breaker.
+
+Outra possibilidade seria aplicar o rate limit juntamente com o limite de chamadas concorrentes.
+
+Um cenário fictício (também utilizado no exemplo de circuit breaker) onde poderíamos aplicar timeout, rate limit, circuit breaker e bulkhead (delimitando o número de chamadas concorrentes) seria o seguinte:
+
+Uma loja virtual com 2 serviços:
+
+1 - Serviço de detalhe do produto que retorna o produto e suas características.
+
+2 - Serviço de comentários de usuários sobre o produto.
+
+Poderíamos definir um timeout condizente com o tempo de resposta viável do ponto de vista de experiência do usuário.
+
+Caso o tempo de resposta do serviço 2 passasse a ser alto ou ultrapassar o limite definido poderíamos aplicar o circuit breaker e não retornar os comentários, ou até mesmo retornar os comentários guardados em cache.
+
+Também poderia ser aplicado um rate limit parametrizado de acordo com o número normal esperado de um usuário de loja virtual. Não faz sentido um usuário de loja virtual fazer diversas chamadas em um curto intervalo de tempo.
+
+O número de chamadas concorrentes também poderia ser ajustado de acordo com o esperado.
+
+Também poderia ser atrelado ao rate limit para que um volume grande de requisições em um curto intervalo de tempo fosse bloqueado e impedisse várias chamadas simultâneas.
+
+O inverso também poderia ser aplicado, mesmo com um grande volume de requisições limitaríamos o número de requisições simultâneas.
+
+Imaginando que o rate limit fosse estourado no serviço 1 poderia aplicar um circuit breaker com o fallback onde seria retornada uma mensagem informando uma indisponibilidade momentanêa ou informando que o limite de requisições foi excedido.
+
+Outra possibilidade de circuit breaker poderia ser aplicado no momento de finalizar a compra e processar o pagamento.
+
+Caso o volume seja muito alto podemos aplicar o fallback de enviar para uma fila para ser processado assíncronicamente.
+
+Obviamente não existe solução padrão que se aplique a todos os cenários, então cada uma dessas abordagens (e seus parâmetros) devem ser estudadas e aplicadas para cada caso.
+
+Além disso o acompanhamento da performance do sistema e do resultado retornado pela aplicação dessas abordagens deve ser continuamente avaliado, trazendo assim possíveis ajustes a serem aplicados. 
 
 # Exemplos Práticos de Resiliência em Aplicações Node.js
 Este material contempla exemplos práticos de uso de técnicas essenciais em aplicações, afim de garantir a confiabilidade, resiliência, escalabilidade e alta disponibilidade.
@@ -258,9 +296,63 @@ Aumentar quantidade de chamadas simultâneas e avaliar o comportamento.
 
 ```
 // INSIRA SUA ANÁLISE OU PARECER ABAIXO
-
-
-
+Bulkhead é um padrão de resiliência que possui o nome retirado da engenharia naval onde os navios são divididos em compartimentos.
+A inundação de um compartimento do navio não o afundará pois o navio possui diversos compartimentos que podem ser isolados.
+No nosso caso esse padrão está barrando o número de chamadas simultâneas para impedir que o sistema sofra uma sobrecarga.
+Alteramos o código para responder em 100 ms e agilizar os testes.
+Para efetuarmos várias chamadas em paralelo utilizamos o apache bench e executamos o comando abaixo:
+ab -n 100 -c 2 localhost:8080/api/bulkhead
+O parâmetro n define o número de requisições e o parâmetro c define a concorrência, isto é, o número de chamadas a serem executadas ao mesmo tempo.
+Com o comando ab -n 100 -c 2 localhost:8080/api/bulkhead o retorno foi:
+Concurrency Level:      2
+Time taken for tests:   5.553 seconds
+Complete requests:      100
+Failed requests:        0
+Total transferred:      22700 bytes
+HTML transferred:       2700 bytes
+Requests per second:    18.01 [#/sec] (mean)
+Time per request:       111.063 [ms] (mean)
+Time per request:       55.531 [ms] (mean, across all concurrent requests)
+Transfer rate:          3.99 [Kbytes/sec] received
+O que nos mostra que não houve falhas.
+Porém ao manter o número de requisições simultâneas e executar o comando ab -n 100 -c 4 localhost:8080/api/bulkhead (100 requisições, 4 simultaneamente) o resultado foi:
+Concurrency Level:      4
+Time taken for tests:   0.225 seconds
+Complete requests:      100
+Failed requests:        97
+   (Connect: 0, Receive: 0, Length: 97, Exceptions: 0)
+Non-2xx responses:      97
+Total transferred:      28617 bytes
+HTML transferred:       6774 bytes
+Requests per second:    443.67 [#/sec] (mean)
+Time per request:       9.016 [ms] (mean)
+Time per request:       2.254 [ms] (mean, across all concurrent requests)
+Transfer rate:          123.99 [Kbytes/sec] received
+O que nos mostra que houve 97 falhas pois o servidor não foi capaz de atender requisições simultâneas.
+Executando o mesmo comando mas com o parâmetro -v 2 (ab -n 100 -c 4 -v 2 localhost:8080/api/bulkhead) temos nos logs o seguinte:
+Erro: Bulkhead capacity exceeded (0/2 execution slots, 0/0 available)
+WARNING: Response code not 2xx (500)
+LOG: header received:
+HTTP/1.1 200 OK
+X-Powered-By: Express
+Content-Type: text/html; charset=utf-8
+Content-Length: 27
+ETag: W/"1b-VUa+qkoedkdRrxq2n13erXmsF1s"
+Date: Sun, 29 Sep 2024 15:05:45 GMT
+Connection: close
+Mostrando que excedemos o limite de chamadas concorrentes definidos.
+Alterando o código para permitir 4 chamadas concorrentes e executando novamente o comando anterior temos o seguinte resultado:
+Concurrency Level:      4
+Time taken for tests:   2.854 seconds
+Complete requests:      100
+Failed requests:        0
+Total transferred:      22700 bytes
+HTML transferred:       2700 bytes
+Requests per second:    35.04 [#/sec] (mean)
+Time per request:       114.160 [ms] (mean)
+Time per request:       28.540 [ms] (mean, across all concurrent requests)
+Transfer rate:          7.77 [Kbytes/sec] received
+O que nos mostra que o servidor foi capaz de lidar com a concorrência de 4 chamadas por vez.
 ```
 
 

@@ -443,7 +443,7 @@ Caso estejamos tendo problema no serviço 2 podemos deixar de chamá-lo para que
 O circuit breaker possui 3 estados descritos abaixo:
 Closed: O comportamento padrão da aplicação, o fluxo não sofre nenhum desvio.
 No nosso exemplo o serviço 1 é chamado que chama o serviço 2 e retorna as características do produto e os comentários dos usuários sobre o mesmo.
-Open: O comportamento em caso de falha, também conhecido como fallback.
+Open: O comportamento em caso de falha onde podemos definir um fallback.
 No nosso exemplo o serviço demora muito para retornar ou não retorna, fazendo com que o circuito seja aberto.
 O nosso fallback seria parar de chamar o serviço 2 e não retornar os comentários. Dessa forma a funcionalida mais importante continuaria funcionando normalmente.
 HalfOpen: O comportamento que faz com que algumas requisicões sigam o fluxo normal e outras sigam o fallback.

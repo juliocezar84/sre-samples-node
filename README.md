@@ -226,7 +226,7 @@ Alterar limite de requisições permitidas para 100 num intervalo de 1 minuto e 
 O rate limit é utilizado para impedir que a aplicação receba um número maior do que o projetado e para que um usuário/recurso não exaura todos os recursos do servidor.
 Outro ponto é impedir chamadas maliciosas com o intuito de onerar e/ou derrubar aplicação, ou até mesmo ficar chamando um serviço para coletar/roubar dados.
 Por exemplo, caso não exista solução de segurança, é possível ficar chamando um serviço de uma loja virtual para coletar dados de produtos.
-Em arquiteturas que possuam autoscaling esse é um mecanismo importante para evitar que chamadas maliciosas faça com que mais recursos sejam alocados e por consequência aumente o custo da aplicação.
+Em arquiteturas que possuam autoscaling esse é um mecanismo importante para evitar que chamadas maliciosas façam com que mais recursos sejam alocados e por consequência aumente o custo da aplicação.
 Importante salientar que existem várias formas de aplicar o rate limit, por exemplo por IP e/ou região geográfica.
 Dessa forma o rate limit pode bloquear requisições de um usuário/recurso e permitir que outro usuário/recurso acesse o serviço normalmente.
 Para fazer mais de 100 chamadas no serviço utilizamos o comando abaixo no bash:
@@ -315,7 +315,7 @@ Time per request:       111.063 [ms] (mean)
 Time per request:       55.531 [ms] (mean, across all concurrent requests)
 Transfer rate:          3.99 [Kbytes/sec] received
 O que nos mostra que não houve falhas.
-Porém ao manter o número de requisições simultâneas e executar o comando ab -n 100 -c 4 localhost:8080/api/bulkhead (100 requisições, 4 simultaneamente) o resultado foi:
+Porém ao manter o número de requisições e executar o comando ab -n 100 -c 4 localhost:8080/api/bulkhead (100 requisições, 4 simultaneamente) o resultado foi:
 Concurrency Level:      4
 Time taken for tests:   0.225 seconds
 Complete requests:      100
